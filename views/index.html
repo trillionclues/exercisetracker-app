@@ -35,7 +35,19 @@
     <script>
       const exerciseForm = document.getElementById("exercise-form");
 
-      exerciseForm.addEventListener("submit", () => {
+      exerciseForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        
+const usernameInput = document.getElementById("uname");
+  const username = usernameInput.value;
+
+        // Check if the username is empty
+  // if (!username || username.trim() === '') {
+  //   alert("Username is required"); // Display an alert message
+  //   return; // Prevent further execution of the code
+  // }
+        
         const userId = document.getElementById("uid").value;
         exerciseForm.action = `/api/users/${userId}/exercises`;
 
