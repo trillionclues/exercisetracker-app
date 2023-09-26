@@ -11,7 +11,7 @@ const exerciseSchema = Schema({
   duration: {
     type: Number,
     required: false
-  } ,
+  },
   date: Date,
   description: {
     type: String,

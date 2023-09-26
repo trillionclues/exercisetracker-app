@@ -9,7 +9,8 @@ const UserSchema = new Schema({
   username: {
     type: String,
     required: true
-  }
+  },
+  log: [{ type: Schema.Types.ObjectId, ref: 'Exercise' }]
 })
 
 // create a model from the userSchema and assign it to the existing variable Person.

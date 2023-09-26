@@ -24,19 +24,6 @@ mongoose.connect(mySecret, { useNewUrlParser: true, useUnifiedTopology: true }).
   console.log("Error connecting to Mongodb:", err)
 })
 
-
-// date format
-  const isValidDate = (date) => {
-    let queryDate;
-    const regex = /^\d{4}-\d{2}-\d{2}$/
-    if(!date.match(regex)) return false
-    const formatDate = new Date(date)
-    const dateToMs = formatDate.getTime()
-    if(!dateToMs && !dateToMs !== 0) return false
-    queryDate = formatDate.toISOString().slice(0,10)
-    return queryDate
-  }
-
 // Create a new user
 app.post('/api/users', async (req, res) => {
   try {
@@ -54,6 +41,11 @@ app.post('/api/users', async (req, res) => {
   }
 })
 
+// function formatDate(date) {
+//   const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+//   return date.toLocaleDateString('en-US', options);
+// }
+
 // post exercise details
 app.post('/api/users/:_id/exercises', async (req, res) => {
   try {
@@ -66,16 +58,23 @@ app.post('/api/users/:_id/exercises', async (req, res) => {
       return res.status(404).json({ error: "User not found!" })
     }
 
+    // Convert the date to the desired format (string)
+    const formattedDate = date ? new Date(date).toDateString() : new Date().toDateString();
+
     // but if found, create exercise associated with user  
     const exercise = new Exercise({
       description,
       duration,
-      date,
+      date: formattedDate,
       user: userId,
     })
 
     // save the exercise
     const savedExercise = await exercise.save()
+
+    // Update the user's log with the new exercise
+    user.log.push(savedExercise);
+    await user.save();
 
     // respond with exercise details json
     res.json({
@@ -83,6 +82,8 @@ app.post('/api/users/:_id/exercises', async (req, res) => {
       description: savedExercise.description,
       duration: savedExercise.duration,
       date: new Date(savedExercise.date).toDateString(),
+      // date: savedExercise.date,
+      // date: formatDate(new Date(savedExercise.date)),
       _id: userId,
     })
   }
@@ -134,15 +135,13 @@ app.get('/api/users/:_id/logs', async (req, res) => {
       userExercises = userExercises.slice(0, limit);
     }
 
-    
     // Format the date property in each exercise log item
     const userLog = userExercises.map((exercise) => ({
       description: exercise.description,
       duration: exercise.duration,
+      // date: exercise.date instanceof Date ? exercise.date.toDateString() : null, // Check if exercise.date exists
       date: new Date(exercise.date).toDateString()
     }));
-
-    
 
     // Display user exercise data
     res.json({
